@@ -21,7 +21,9 @@ export const addTweet = async (req: ExtendedRequest, res: Response) => {
     const newTweet = await createTweet(
         req.userSlug as string,
         safeData.data.body,
-        safeData.data.answer ? parseInt(safeData.data.answer) : 0
+        safeData.data.answer ? parseInt(safeData.data.answer) : 0,
+        req.files.image
+       
     );
 
     const hashtags = safeData.data.body.match(/#[a-zA-Z0-9_]+/g);

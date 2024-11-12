@@ -1,10 +1,11 @@
 import { Response } from "express";
 import { ExtendedRequest } from "../types/extended-request";
-import { checkIfFollows, findUserBySlug, follow, getUserFollowersCount, getUserFollowingCount, getUserTweetCount, unfollow, UpdateUserInfo } from "../services/user";
+import { checkIfFollows, findUserBySlug, follow, getUserFollowersCount, getUserFollowingCount, getUserTweetCount, unfollow, UpdateUserInfo, userUploadAvatar, userUploadCover } from "../services/user";
 import { userTweetsSchema } from "../schemas/user-tweets";
 import { findTweetsByUser } from "../services/tweet";
 import { updateUserSchema } from "../schemas/update-user";
-import slug from "slug";
+import { userAvatarSchema } from "../schemas/user-avatar";
+import { userCoverSchema } from "../schemas/user-cover";
 
 export const getUser = async (req: ExtendedRequest, res: Response) => {
     const { slug } = req.params;
@@ -59,17 +60,48 @@ export const followToggle = async (req: ExtendedRequest, res: Response) => {
 }
 
 export const updateUser = async (req: ExtendedRequest, res: Response) => {
-  const safeData = updateUserSchema.safeParse(req.body);
-  if (!safeData.success) {
-      return res.json({ error: safeData.error.flatten().fieldErrors });
-  }
+    const safeData = updateUserSchema.safeParse(req.body);
 
-  await UpdateUserInfo(
-    req.userSlug as string,
-    safeData.data
-  )
+    if (!safeData.success) {
+        return res.json({ error: safeData.error.flatten().fieldErrors });
+    }
 
-  res.json({});
+    await UpdateUserInfo(
+        req.userSlug as string,
+        safeData.data
+    )
+
+    res.json({ user: 'Alterado com sucesso!' });
+}
+
+export const updateAvatar = async (req: ExtendedRequest, res: Response) => {
+
+    const safeData = userAvatarSchema.safeParse(req.body);
+    if (!safeData.success) {
+        return res.json({ error: safeData.error.flatten().fieldErrors });
+    }
+
+    await userUploadAvatar(
+        req.files.avatar,
+        safeData.data as string
+    );
+
+    res.json({});
+}
+
+export const updateCover = async (req: ExtendedRequest, res: Response) => {
+    const safeData = userCoverSchema.safeParse(req.body);
+    if (!safeData.success) {
+        return res.json({ error: safeData.error.flatten().fieldErrors });
+    }
+
+    
+     await userUploadCover(
+        req.files.cover,
+        safeData.data
+    )
+    
+    res.json({});
 }
 
 

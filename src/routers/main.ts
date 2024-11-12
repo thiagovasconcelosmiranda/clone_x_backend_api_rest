@@ -1,4 +1,7 @@
 import { Router } from "express";
+import  express from "express";
+import path from "path";
+
 import * as pingController from "../controllers/ping";
 import * as authController from "../controllers/auth";
 import * as tweetController from '../controllers/tweet';
@@ -28,12 +31,11 @@ mainRouter.get('/user/:slug/tweets', verifyJwt, userController.getUserTweet);
 mainRouter.post('/user/:slug/follow', verifyJwt, userController.followToggle);
 
 mainRouter.put('/user', verifyJwt, userController.updateUser);
-//mainRouter.put('/user/avatar', verifyJwt, userController.);
-//mainRouter.put('/user/cover');
+mainRouter.put('/user/avatar', verifyJwt, userController.updateAvatar);
+mainRouter.put('/user/cover', verifyJwt, userController.updateCover);
 
 mainRouter.get('/feed', verifyJwt, feedController.getFeed);
 mainRouter.get('/search', verifyJwt, searchController.searchTweets);
 mainRouter.get('/trending', verifyJwt, trendController.getTrend);
 mainRouter.get('/suggestions', verifyJwt, suggestionController.getSuggestions);
-
 

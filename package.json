@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node --import=tsx --watch --env-file=.env ./src/server.ts"
+    "dev": "node --import=tsx --watch --env-file=.env ./src/server.ts",
+    "vercel-build": "npx prisma migrate deploy"
   },
   "author": "",
   "license": "ISC",
@@ -21,11 +22,14 @@
   "dependencies": {
     "@prisma/adapter-pg": "^5.20.0",
     "@prisma/client": "^5.20.0",
+    "@types/express-fileupload": "^1.5.1",
     "bcrypt-ts": "^5.0.2",
     "cors": "^2.8.5",
     "express": "^4.21.0",
+    "express-fileupload": "^1.5.1",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
+    "npm-path": "^2.0.4",
     "pg": "^8.13.0",
     "slug": "^9.1.0",
     "zod": "^3.23.8"

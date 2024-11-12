@@ -1,6 +1,9 @@
 import slug from "slug";
 import { prisma } from "../utils/prisma"
 import { getPublicUrl } from "../utils/url";
+import path from "path";
+import fs, { mkdirSync } from 'fs';
+
 
 export const findTweet = async (id: number) => {
     const tweet = await prisma.tweet.findFirst({
@@ -27,14 +30,34 @@ export const findTweet = async (id: number) => {
     }
 }
 
-export const createTweet = async (slug: string, body: string, answer?: number) => {
+export const createTweet = async (slug: string, body: string, answer?: number, image?: any ) => {
+    const dirname = path.join(__dirname, '../../public/posts/');
+
+
+   
+   
     const newTweet = await prisma.tweet.create({
         data: {
             body,
             userStlug: slug,
-            answerOf: answer ?? 0
+            answerOf: answer ?? 0,
+            image: image.name
         }
     });
+    
+    
+
+
+    if (!fs.existsSync(dirname + slug)) {
+        mkdirSync(dirname + slug);
+    }
+
+    
+    if(fs.existsSync(dirname + slug)){
+        mkdirSync(dirname + slug + '/'+ newTweet.id);
+    }
+    
+    image.mv(dirname + slug + '/'+ newTweet.id +'/' + image.name);
 
     return newTweet;
 }
@@ -98,6 +121,13 @@ export const likeTweet = async (slug: string, id: number) => {
 export const findTweetsByUser = async (slug: string, currentPage: number, perPage: number) => {
     const tweets = await prisma.tweet.findMany({
         include: {
+            user: {
+                select: {
+                    name: true,
+                    avatar: true,
+                    slug: true
+                }
+            },
             likes: {
                 select: {
                     userSlug: true

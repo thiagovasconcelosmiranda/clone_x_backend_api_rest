@@ -1,7 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../utils/prisma';
 import { getPublicUrl } from '../utils/url';
-import { ping } from '../controllers/ping';
+import path from 'path';
+import fs, { mkdirSync } from 'fs';
 
 export const findUserByEmail = async (email: string) => {
   const user = await prisma.user.findFirst({
@@ -125,9 +126,9 @@ export const getUserSuggestions = async (slug: string) => {
   const followingPlusMe = await [...following, slug];
 
   type Suggestion = Pick<Prisma.UserGetPayload<Prisma.UserDefaultArgs>,
-  "name" | "avatar" | "slug"
+    "name" | "avatar" | "slug"
   >;
-  
+
   const suggestions: Suggestion[] = await prisma.$queryRaw`
    SELECT
     name, avatar, slug
@@ -137,8 +138,60 @@ export const getUserSuggestions = async (slug: string) => {
     LIMIT 2;
    `;
 
-   for(let sugIndex in suggestions){
+  for (let sugIndex in suggestions) {
     suggestions[sugIndex].avatar = getPublicUrl(suggestions[sugIndex].avatar);
-   }
-   return suggestions;
+  }
+  return suggestions;
+}
+export const userUploadAvatar = async (avatar: any, slug: string) => {
+
+  const dirname = path.join(__dirname, '../../public/avatars/');
+
+  const user = await prisma.user.findFirstOrThrow({
+    select: { avatar: true },
+    where: { slug }
+  });
+
+  if (!fs.existsSync(dirname + slug)) {
+    mkdirSync(dirname + slug);
+  }
+
+  if (fs.existsSync(dirname + slug + '/' + user.avatar)) {
+    fs.unlinkSync(dirname + slug + '/' + user.avatar);
+  }
+
+  avatar.mv(dirname + slug + '/' + avatar.name);
+
+  await prisma.user.update({
+    where: { slug },
+    data: {
+      avatar: avatar.name
+    }
+  });
+}
+
+export const userUploadCover = async (cover: any, data: any) => {
+  const dirname = path.join(__dirname, '../../public/covers/');
+
+  const user = await prisma.user.findFirstOrThrow({
+    select: { cover: true },
+    where: { slug: data.slug }
+  });
+
+  if (!fs.existsSync(dirname + data.slug)) {
+    mkdirSync(dirname + data.slug);
+  }
+
+  if (fs.existsSync(dirname + data.slug + '/' + user.cover)) {
+    fs.unlinkSync(dirname + data.slug + '/' + user.cover);
+  }
+
+  cover.mv(dirname + data.slug + '/' + cover.name);
+
+  await prisma.user.update({
+    where: {slug: data.slug },
+    data: {
+      cover: cover.name
+    }
+  });
 }
