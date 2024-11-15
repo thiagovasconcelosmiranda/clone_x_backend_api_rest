@@ -80,10 +80,10 @@ export const updateAvatar = async (req: ExtendedRequest, res: Response) => {
     if (!safeData.success) {
         return res.json({ error: safeData.error.flatten().fieldErrors });
     }
-
+    
     await userUploadAvatar(
         req.files.avatar,
-        safeData.data as string
+        safeData.data.slug as string
     );
 
     res.json({});
@@ -95,13 +95,13 @@ export const updateCover = async (req: ExtendedRequest, res: Response) => {
         return res.json({ error: safeData.error.flatten().fieldErrors });
     }
 
-    
-     await userUploadCover(
+    const t = await userUploadCover(
         req.files.cover,
-        safeData.data
+        safeData.data.slug
     )
+ res.json(t);
     
-    res.json({});
+   
 }
 
 

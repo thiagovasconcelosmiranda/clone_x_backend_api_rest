@@ -6,10 +6,16 @@ import { addHashtag } from "../services/trend";
 
 export const addTweet = async (req: ExtendedRequest, res: Response) => {
     const safeData = addTweetSchema.safeParse(req.body);
+    var file = null;
     if (!safeData.success) {
         res.json({ error: safeData.error.flatten().fieldErrors });
         return;
     }
+
+    if(req.files){
+       file = req.files.image
+    }
+
 
     if (safeData.data.answer) {
         const hasAnswerTweet = findTweet(parseInt(safeData.data.answer));
@@ -18,14 +24,14 @@ export const addTweet = async (req: ExtendedRequest, res: Response) => {
         }
     }
 
+    
     const newTweet = await createTweet(
         req.userSlug as string,
         safeData.data.body,
         safeData.data.answer ? parseInt(safeData.data.answer) : 0,
-        req.files.image
-       
+        file 
     );
-
+    
     const hashtags = safeData.data.body.match(/#[a-zA-Z0-9_]+/g);
     if (hashtags) {
         for (let hashtag of hashtags) {
@@ -34,6 +40,8 @@ export const addTweet = async (req: ExtendedRequest, res: Response) => {
             }
         }
     }
+    
+
     res.json(newTweet);
 }
 

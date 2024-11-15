@@ -25,41 +25,42 @@ export const findTweet = async (id: number) => {
     });
 
     if (tweet) {
-        tweet.user.avatar = getPublicUrl(tweet.user.avatar);
+        tweet.user.avatar = getPublicUrl(tweet.user.avatar, 'avatars', tweet.user.slug);
         return tweet;
     }
 }
 
 export const createTweet = async (slug: string, body: string, answer?: number, image?: any ) => {
     const dirname = path.join(__dirname, '../../public/posts/');
+    var nameImage = null;
+    
+    if(image !== null){
+       nameImage = image.name;
+    }
 
-
-   
-   
+    
     const newTweet = await prisma.tweet.create({
         data: {
             body,
             userStlug: slug,
             answerOf: answer ?? 0,
-            image: image.name
+            image: nameImage
         }
     });
     
-    
+    if(image !== null){
+       if (!fs.existsSync(dirname + slug)) {
+         mkdirSync(dirname + slug);
+       }
 
-
-    if (!fs.existsSync(dirname + slug)) {
-        mkdirSync(dirname + slug);
+       if(fs.existsSync(dirname + slug)){
+          mkdirSync(dirname + slug + '/'+ newTweet.id);
+       }
+   
+       image.mv(dirname + slug + '/'+ newTweet.id +'/' + image.name);
     }
-
     
-    if(fs.existsSync(dirname + slug)){
-        mkdirSync(dirname + slug + '/'+ newTweet.id);
-    }
-    
-    image.mv(dirname + slug + '/'+ newTweet.id +'/' + image.name);
-
-    return newTweet;
+    return  newTweet;
 }
 
 export const findAnswersTweet = async (id: number) => {
@@ -83,7 +84,7 @@ export const findAnswersTweet = async (id: number) => {
 
 
     for (let tweetIndex in tweets) {
-        tweets[tweetIndex].user.avatar = getPublicUrl(tweets[tweetIndex].user.avatar)
+        tweets[tweetIndex].user.avatar = getPublicUrl(tweets[tweetIndex].user.avatar, 'avatars', tweets[tweetIndex].user.slug)
     }
 
     return tweets;
@@ -169,7 +170,7 @@ export const findTweetFeed = async (following: string[], currentPage: number, pe
     });
 
     for (let tweetIndex in tweets) {
-        tweets[tweetIndex].user.avatar = getPublicUrl(tweets[tweetIndex].user.avatar);
+        tweets[tweetIndex].user.avatar = getPublicUrl(tweets[tweetIndex].user.avatar, 'avatars', tweets[tweetIndex].user.slug);
     }
     return tweets;
 }
@@ -204,7 +205,7 @@ export const findTweetsByBody = async (bodyContains: string, currentPage: number
     });
 
     for (let tweetIndex in tweets) {
-        tweets[tweetIndex].user.avatar = getPublicUrl(tweets[tweetIndex].user.avatar);
+        tweets[tweetIndex].user.avatar = getPublicUrl(tweets[tweetIndex].user.avatar, 'avatars', tweets[tweetIndex].user.slug);
     }
     return tweets;
 }

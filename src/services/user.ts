@@ -12,8 +12,8 @@ export const findUserByEmail = async (email: string) => {
   if (user) {
     return {
       ...user,
-      avatar: getPublicUrl(user.avatar),
-      cover: getPublicUrl(user.cover)
+      avatar: getPublicUrl(user.avatar,'avatars', user.slug),
+      cover: getPublicUrl(user.cover, 'covers', user.slug)
     }
   }
 
@@ -35,8 +35,8 @@ export const findUserBySlug = async (slug: string) => {
   if (user) {
     return {
       ...user,
-      avatar: getPublicUrl(user.avatar),
-      cover: getPublicUrl(user.cover)
+      avatar: getPublicUrl(user.avatar,'avatars', user.slug),
+      cover: getPublicUrl(user.cover,'covers', user.slug)
     }
   }
 
@@ -45,12 +45,14 @@ export const findUserBySlug = async (slug: string) => {
 
 
 export const createUser = async (data: Prisma.UserCreateInput) => {
-  const newUser = await prisma.user.create({ data });
+  const dirname = path.join(__dirname, '../../public/avatars/');
 
+  const newUser = await prisma.user.create({ data });
+  
   return {
     ...newUser,
-    avatar: getPublicUrl(newUser.avatar),
-    cover: getPublicUrl(newUser.cover)
+    avatar: getPublicUrl(newUser.avatar, 'avatars', newUser.slug),
+    cover: getPublicUrl(newUser.cover, 'covers', newUser.slug)
   }
 }
 
@@ -139,18 +141,22 @@ export const getUserSuggestions = async (slug: string) => {
    `;
 
   for (let sugIndex in suggestions) {
-    suggestions[sugIndex].avatar = getPublicUrl(suggestions[sugIndex].avatar);
+    suggestions[sugIndex].avatar = getPublicUrl(
+      suggestions[sugIndex].avatar,
+      'avatars',
+      suggestions[sugIndex].slug);
   }
   return suggestions;
 }
-export const userUploadAvatar = async (avatar: any, slug: string) => {
 
+export const userUploadAvatar = async (avatar: any, slug: string) => {
   const dirname = path.join(__dirname, '../../public/avatars/');
 
   const user = await prisma.user.findFirstOrThrow({
     select: { avatar: true },
     where: { slug }
   });
+
 
   if (!fs.existsSync(dirname + slug)) {
     mkdirSync(dirname + slug);
@@ -160,9 +166,10 @@ export const userUploadAvatar = async (avatar: any, slug: string) => {
     fs.unlinkSync(dirname + slug + '/' + user.avatar);
   }
 
+
   avatar.mv(dirname + slug + '/' + avatar.name);
 
-  await prisma.user.update({
+   await prisma.user.update({
     where: { slug },
     data: {
       avatar: avatar.name
@@ -170,26 +177,26 @@ export const userUploadAvatar = async (avatar: any, slug: string) => {
   });
 }
 
-export const userUploadCover = async (cover: any, data: any) => {
+export const userUploadCover = async (cover: any, slug: any) => {
   const dirname = path.join(__dirname, '../../public/covers/');
 
   const user = await prisma.user.findFirstOrThrow({
     select: { cover: true },
-    where: { slug: data.slug }
+    where: { slug: slug }
   });
 
-  if (!fs.existsSync(dirname + data.slug)) {
-    mkdirSync(dirname + data.slug);
+  if (!fs.existsSync(dirname + slug)) {
+    mkdirSync(dirname + slug);
   }
 
-  if (fs.existsSync(dirname + data.slug + '/' + user.cover)) {
-    fs.unlinkSync(dirname + data.slug + '/' + user.cover);
+  if (fs.existsSync(dirname + slug + '/' + user.cover)) {
+    fs.unlinkSync(dirname + slug + '/' + user.cover);
   }
 
-  cover.mv(dirname + data.slug + '/' + cover.name);
-
+  cover.mv(dirname + slug + '/' + cover.name);
+  
   await prisma.user.update({
-    where: {slug: data.slug },
+    where: { slug: slug },
     data: {
       cover: cover.name
     }

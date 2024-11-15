@@ -1,3 +1,3 @@
-export const getPublicUrl = (url: string) => {
-    return `${process.env.BASE_URL}/${url}`;
+export const getPublicUrl = (url: string, dir: string, slug: string) => {
+    return `${process.env.BASE_URL}/${dir}/${slug}/${url}`;
 }
