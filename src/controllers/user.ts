@@ -6,6 +6,8 @@ import { findTweetsByUser } from "../services/tweet";
 import { updateUserSchema } from "../schemas/update-user";
 import { userAvatarSchema } from "../schemas/user-avatar";
 import { userCoverSchema } from "../schemas/user-cover";
+import { prisma } from "../utils/prisma";
+import { count } from "console";
 
 export const getUser = async (req: ExtendedRequest, res: Response) => {
     const { slug } = req.params;
@@ -16,12 +18,12 @@ export const getUser = async (req: ExtendedRequest, res: Response) => {
     const followingCount = await getUserFollowingCount(user.slug);
     const followersCount = await getUserFollowersCount(user.slug);
     const tweetCount = await getUserTweetCount(user.slug);
-
     res.json({ user, followingCount, followersCount, tweetCount });
 }
 
 export const getUserTweet = async (req: ExtendedRequest, res: Response) => {
     const { slug } = req.params;
+
 
     const safeData = userTweetsSchema.safeParse(req.query);
     if (!safeData.success) {
@@ -31,20 +33,18 @@ export const getUserTweet = async (req: ExtendedRequest, res: Response) => {
 
     let perPage = 2;
     let currentPage = safeData.data.page ?? 0;
-
     const tweets = await findTweetsByUser(
         slug,
         currentPage,
         perPage
     );
-    res.json({ tweets, page: currentPage });
+   
+    res.json({ tweets: tweets[0], page: currentPage, countTweet: tweets[1], perPage: perPage});
 }
 
 export const followToggle = async (req: ExtendedRequest, res: Response) => {
     const { slug } = req.params;
-
     const me = req.userSlug as string;
-
 
     const hasUserBeFollowed = await findUserBySlug(slug);
     if (!hasUserBeFollowed) return res.json({ error: 'Usuário inexistente' });
@@ -65,13 +65,12 @@ export const updateUser = async (req: ExtendedRequest, res: Response) => {
     if (!safeData.success) {
         return res.json({ error: safeData.error.flatten().fieldErrors });
     }
-
-    await UpdateUserInfo(
+    
+   await UpdateUserInfo(
         req.userSlug as string,
         safeData.data
     )
-
-    res.json({ user: 'Alterado com sucesso!' });
+    res.json({});
 }
 
 export const updateAvatar = async (req: ExtendedRequest, res: Response) => {

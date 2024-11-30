@@ -36,8 +36,9 @@ export const findUserBySlug = async (slug: string) => {
     return {
       ...user,
       avatar: getPublicUrl(user.avatar,'avatars', user.slug),
-      cover: getPublicUrl(user.cover,'covers', user.slug)
+      cover: getPublicUrl(user.cover,'covers', user.slug),
     }
+  
   }
 
   return null;
@@ -75,7 +76,7 @@ export const getUserFollowersCount = async (slug: string) => {
 
 export const getUserTweetCount = async (slug: string) => {
   const count = await prisma.tweet.count({
-    where: { userStlug: slug }
+    where: { userSlug: slug }
   });
 
   return count;
@@ -156,8 +157,7 @@ export const userUploadAvatar = async (avatar: any, slug: string) => {
     select: { avatar: true },
     where: { slug }
   });
-
-
+   
   if (!fs.existsSync(dirname + slug)) {
     mkdirSync(dirname + slug);
   }
@@ -166,15 +166,16 @@ export const userUploadAvatar = async (avatar: any, slug: string) => {
     fs.unlinkSync(dirname + slug + '/' + user.avatar);
   }
 
-
   avatar.mv(dirname + slug + '/' + avatar.name);
-
+  
    await prisma.user.update({
     where: { slug },
     data: {
       avatar: avatar.name
     }
   });
+  
+ return avatar;
 }
 
 export const userUploadCover = async (cover: any, slug: any) => {

@@ -1,7 +1,8 @@
 import { Response } from "express";
 import { ExtendedRequest } from "../types/extended-request";
 import { addTweetSchema } from "../schemas/add-tweet";
-import { checkIfTweetIsByUser, createTweet, findAnswersTweet, findTweet, likeTweet, unlikeTweet } from "../services/tweet";
+import { AddAnswerSchema } from '../schemas/add-answer';
+import { checkIfTweetIsByUser, createTweet, findAnswersTweet, findTweet, likeTweet, unlikeTweet, createAnswers } from "../services/tweet";
 import { addHashtag } from "../services/trend";
 
 export const addTweet = async (req: ExtendedRequest, res: Response) => {
@@ -12,10 +13,9 @@ export const addTweet = async (req: ExtendedRequest, res: Response) => {
         return;
     }
 
-    if(req.files){
-       file = req.files.image
+    if (req.files) {
+        file = req.files.image
     }
-
 
     if (safeData.data.answer) {
         const hasAnswerTweet = findTweet(parseInt(safeData.data.answer));
@@ -24,15 +24,14 @@ export const addTweet = async (req: ExtendedRequest, res: Response) => {
         }
     }
 
-    
     const newTweet = await createTweet(
         req.userSlug as string,
         safeData.data.body,
         safeData.data.answer ? parseInt(safeData.data.answer) : 0,
-        file 
+        file
     );
-    
-    const hashtags = safeData.data.body.match(/#[a-zA-Z0-9_]+/g);
+
+    const hashtags = safeData.data.body.match(/#[a-zA-Z0-r9_]+/g);
     if (hashtags) {
         for (let hashtag of hashtags) {
             if (hashtag.length >= 2) {
@@ -40,8 +39,6 @@ export const addTweet = async (req: ExtendedRequest, res: Response) => {
             }
         }
     }
-    
-
     res.json(newTweet);
 }
 
@@ -78,7 +75,28 @@ export const likeToggle = async (req: ExtendedRequest, res: Response) => {
             parseInt(id)
         )
     }
-
     res.json({});
+}
 
+export const addAnswers = async (req: ExtendedRequest, res: Response) => {
+    const { id } = req.params;
+    const safeData = AddAnswerSchema.safeParse(req.body);
+
+    if (!safeData.success) {
+        res.json({ error: safeData.error.flatten().fieldErrors });
+        return;
+    }
+  let file = null;
+
+  if(req.files){
+    file = req.files.image;
+  }
+    const answer = await createAnswers(
+        req.body.body,
+        file,
+        req.userSlug as string,
+        parseInt(id)
+    )
+        
+    res.json(answer);
 }
