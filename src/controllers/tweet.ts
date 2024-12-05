@@ -2,8 +2,9 @@ import { Response } from "express";
 import { ExtendedRequest } from "../types/extended-request";
 import { addTweetSchema } from "../schemas/add-tweet";
 import { AddAnswerSchema } from '../schemas/add-answer';
-import { checkIfTweetIsByUser, createTweet, findAnswersTweet, findTweet, likeTweet, unlikeTweet, createAnswers } from "../services/tweet";
+import { checkIfTweetIsByUser, createTweet, findAnswersTweet, findTweet, likeTweet, unlikeTweet, createAnswers, countTweetFeed, checkIfAnswerIsByUser, likeAnswer, unlikeAnswer } from "../services/tweet";
 import { addHashtag } from "../services/trend";
+import { json } from "stream/consumers";
 
 export const addTweet = async (req: ExtendedRequest, res: Response) => {
     const safeData = addTweetSchema.safeParse(req.body);
@@ -63,19 +64,23 @@ export const likeToggle = async (req: ExtendedRequest, res: Response) => {
         req.userSlug as string,
         parseInt(id)
     )
+    let like: boolean = false;
 
     if (liked) {
         unlikeTweet(
             req.userSlug as string,
             parseInt(id)
-        )
+        );
+        like = false;
+
     } else {
         likeTweet(
             req.userSlug as string,
             parseInt(id)
-        )
+        );
+        like = true;
     }
-    res.json({});
+    res.json({ like: like });
 }
 
 export const addAnswers = async (req: ExtendedRequest, res: Response) => {
@@ -86,17 +91,42 @@ export const addAnswers = async (req: ExtendedRequest, res: Response) => {
         res.json({ error: safeData.error.flatten().fieldErrors });
         return;
     }
-  let file = null;
+    let file = null;
 
-  if(req.files){
-    file = req.files.image;
-  }
+    if (req.files) {
+        file = req.files.image;
+    }
     const answer = await createAnswers(
         req.body.body,
         file,
         req.userSlug as string,
         parseInt(id)
     )
-        
+
     res.json(answer);
+}
+
+export const answerLikeToggle = async (req: ExtendedRequest, res: Response) => {
+    const { id } = req.params;
+   
+    const liked = await checkIfAnswerIsByUser(
+        req.userSlug as string,
+        parseInt(id)
+    )
+    let like: boolean = false;
+
+    if(liked){
+        unlikeAnswer(
+            req.userSlug as string,
+            parseInt(id)
+        );
+        like = false;
+     
+    }else{
+        await likeAnswer(
+            req.userSlug as string,
+            parseInt(id));
+        like = true;
+    }
+    res.json({like: like}) 
 }

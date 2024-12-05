@@ -26,6 +26,7 @@ mainRouter.get('/tweet/:id', verifyJwt, tweetController.getTweet);
 mainRouter.get('/tweet/:id/:answers', verifyJwt, tweetController.getAnswers);
 mainRouter.post('/tweet/:id/like', verifyJwt, tweetController.likeToggle);
 mainRouter.post('/tweet/:id/answer', verifyJwt, tweetController.addAnswers);
+mainRouter.post('/tweet/:id/answerlike', verifyJwt, tweetController.answerLikeToggle);
 
 mainRouter.get('/user/:slug', verifyJwt, userController.getUser);
 mainRouter.get('/user/:slug/tweets', verifyJwt, userController.getUserTweet);
