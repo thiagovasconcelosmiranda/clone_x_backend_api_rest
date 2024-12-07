@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { prisma } from '../utils/prisma';
 import { getPublicUrl } from '../utils/url';
 import path from 'path';

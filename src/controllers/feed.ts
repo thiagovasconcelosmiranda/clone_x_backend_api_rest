@@ -13,12 +13,8 @@ export const getFeed = async (req: ExtendedRequest, res: Response) => {
    
     let perPage = 4;
     let currentPage = safeData.data.page ?? 0;
-   
     const following = await getUserFollowing(req.userSlug as string);
-
     const countTweet = await countTweetFeed(following);
     const tweets = await findTweetFeed(following, currentPage, perPage);
-    console.log(countTweet);
-
     res.json({ tweets, page: currentPage, countTweet, perPage, following});
 }

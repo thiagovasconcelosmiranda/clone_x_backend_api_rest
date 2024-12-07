@@ -198,7 +198,6 @@ export const countTweetFeed = async (following: string[]) => {
 }
 
 export const findTweetFeed = async (following: string[], currentPage: number, perPage: number) => {
-
     const tweets = await prisma.tweet.findMany({
         include: {
             user: {
