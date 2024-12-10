@@ -3,7 +3,7 @@ import { signUpSchema } from "../schemas/signup";
 import { createUser, findUserByEmail } from "../services/user";
 import { findUserBySlug } from "../services/user";
 import slug from "slug";
-import { compare, hashSync } from "bcrypt-ts";
+import { compare, hashSync } from "bcrypt";
 import { number, string } from "zod";
 import { strict } from "assert";
 import { createJwt } from "../utils/jwt";
@@ -36,7 +36,8 @@ export const signUp: RequestHandler = async (req, res) => {
     }
 
     // Gerar hash de senha
-    const hasPassword = await hashSync(safeData.data.password, 10);
+    //const hasPassword = await hashSync(safeData.data.password, 10);
+    const hasPassword = 'teste';
 
 
     //cria o usuario

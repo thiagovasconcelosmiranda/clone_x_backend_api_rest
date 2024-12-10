@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --import=tsx --watch --env-file=.env ./src/server.ts",
-    "vercel-build":"npx prisma migrate dev deploy"
+    "vercel-build": "npx prisma migrate dev deploy"
   },
   "author": "",
   "license": "ISC",
@@ -22,7 +22,9 @@
   "dependencies": {
     "@prisma/adapter-pg": "^5.20.0",
     "@prisma/client": "^5.20.0",
+    "@types/bcrypt": "^5.0.2",
     "@types/express-fileupload": "^1.5.1",
+    "bcrypt": "^5.1.1",
     "bcrypt-ts": "^5.0.2",
     "cors": "^2.8.5",
     "express": "^4.21.0",
